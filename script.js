@@ -8,6 +8,7 @@ const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const fileInput = document.getElementById('user-file');
 const toast = document.getElementById('toast');
+const form = document.getElementById('quiz-form'); // optional: form wrapper
 
 const BACKEND_BASE = "https://troll-backend.onrender.com/api";
 
@@ -110,16 +111,23 @@ if (fileInput) {
 }
 
 // ================================
+// PREVENT FORM SUBMISSION (if inside <form>)
+// ================================
+if (form) {
+  form.addEventListener('submit', e => e.preventDefault());
+}
+
+// ================================
 // SUBMIT BUTTON → CHECK FILE + UPLOAD + SUCCESS SCREEN
 // ================================
 if (btn) {
   btn.addEventListener('click', async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // stop form submission
 
     // ✅ Check if file is selected
     if (!fileInput || fileInput.files.length === 0) {
       showToast("Please select a file before submitting!");
-      return;
+      return; // stop execution
     }
 
     // Upload file
@@ -132,4 +140,4 @@ if (btn) {
     if (quiz) quiz.style.display = "none";
     if (success) success.style.display = "block";
   });
-  }
+    }
