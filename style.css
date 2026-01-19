@@ -327,3 +327,32 @@ body {
         padding: 10px 12px;
     }
     }
+.question-card input[type="text"],
+.question-card input[type="email"] {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    background-color: #fff;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+    box-sizing: border-box;
+    margin-top: 6px;
+}
+
+.question-card input[type="text"]:focus,
+.question-card input[type="email"]:focus {
+    border-color: #1a73e8;
+    box-shadow: 0 1px 6px rgba(26, 115, 232, 0.3);
+}
+
+/* Placeholder styling like Google Forms */
+.question-card input[type="text"]::placeholder,
+.question-card input[type="email"]::placeholder {
+    color: #5f6368;
+    opacity: 1;
+    font-size: 16px;
+    }
+    
+
