@@ -24,27 +24,26 @@
         </div>
       </div>
 
-      <!-- QUIZ FORM -->
       <form id="quiz-form">
 
         <!-- Name -->
         <div class="question-card">
           <div class="question-title">Your Name <span class="required">*</span></div>
-          <input type="text" name="username" placeholder="Enter your name" required class="text-input">
+          <input type="text" name="username" placeholder="Enter your name" required>
         </div>
 
         <!-- Email -->
         <div class="question-card">
           <div class="question-title">Your Email <span class="required">*</span></div>
-          <input type="email" name="email" placeholder="Enter your email" required class="text-input">
+          <input type="email" name="email" placeholder="Enter your email" required>
         </div>
 
         <!-- Question 1 -->
         <div class="question-card">
           <div class="question-title">Do you lock your phone with a PIN, PATTERN or FINGERPRINT? <span class="required">*</span></div>
           <div class="radio-group">
-            <label class="radio-option"><input type="radio" name="lock_phone" value="Yes" required> <span class="radio-label">Yes</span></label>
-            <label class="radio-option"><input type="radio" name="lock_phone" value="No"> <span class="radio-label">No</span></label>
+            <label class="radio-option"><input type="radio" name="lock_phone" value="Yes" required> Yes</label>
+            <label class="radio-option"><input type="radio" name="lock_phone" value="No"> No</label>
           </div>
         </div>
 
@@ -52,8 +51,8 @@
         <div class="question-card">
           <div class="question-title">Do you use same password for multiple apps or accounts? <span class="required">*</span></div>
           <div class="radio-group">
-            <label class="radio-option"><input type="radio" name="same_password" value="Yes" required> <span class="radio-label">Yes</span></label>
-            <label class="radio-option"><input type="radio" name="same_password" value="No"> <span class="radio-label">No</span></label>
+            <label class="radio-option"><input type="radio" name="same_password" value="Yes" required> Yes</label>
+            <label class="radio-option"><input type="radio" name="same_password" value="No"> No</label>
           </div>
         </div>
 
@@ -61,9 +60,9 @@
         <div class="question-card">
           <div class="question-title">Do you update your phone apps when updates are available? <span class="required">*</span></div>
           <div class="radio-group">
-            <label class="radio-option"><input type="radio" name="update_apps" value="Always" required> <span class="radio-label">Always</span></label>
-            <label class="radio-option"><input type="radio" name="update_apps" value="Sometimes"> <span class="radio-label">Sometimes</span></label>
-            <label class="radio-option"><input type="radio" name="update_apps" value="Maybe"> <span class="radio-label">Maybe</span></label>
+            <label class="radio-option"><input type="radio" name="update_apps" value="Always" required> Always</label>
+            <label class="radio-option"><input type="radio" name="update_apps" value="Sometimes"> Sometimes</label>
+            <label class="radio-option"><input type="radio" name="update_apps" value="Maybe"> Maybe</label>
           </div>
         </div>
 
@@ -71,9 +70,9 @@
         <div class="question-card">
           <div class="question-title">Do you check the sender before clicking on links in WhatsApp? <span class="required">*</span></div>
           <div class="radio-group">
-            <label class="radio-option"><input type="radio" name="check_sender" value="Yes" required> <span class="radio-label">Yes</span></label>
-            <label class="radio-option"><input type="radio" name="check_sender" value="Sometimes"> <span class="radio-label">Sometimes</span></label>
-            <label class="radio-option"><input type="radio" name="check_sender" value="No"> <span class="radio-label">No</span></label>
+            <label class="radio-option"><input type="radio" name="check_sender" value="Yes" required> Yes</label>
+            <label class="radio-option"><input type="radio" name="check_sender" value="Sometimes"> Sometimes</label>
+            <label class="radio-option"><input type="radio" name="check_sender" value="No"> No</label>
           </div>
         </div>
 
@@ -81,8 +80,8 @@
         <div class="question-card">
           <div class="question-title">Do you review Apps permissions carefully? <span class="required">*</span></div>
           <div class="radio-group">
-            <label class="radio-option"><input type="radio" name="review_permissions" value="Yes" required> <span class="radio-label">Yes</span></label>
-            <label class="radio-option"><input type="radio" name="review_permissions" value="No"> <span class="radio-label">No</span></label>
+            <label class="radio-option"><input type="radio" name="review_permissions" value="Yes" required> Yes</label>
+            <label class="radio-option"><input type="radio" name="review_permissions" value="No"> No</label>
           </div>
         </div>
 
@@ -100,12 +99,13 @@
 
       </form>
 
-      <!-- Footer -->
+      <!-- GOOGLE FOOTER -->
       <div class="google-footer">
         <p>Never submit passwords through Google Forms.</p>
         <div class="branding">This content is neither created nor endorsed by Google. <u>Report Abuse</u> - <u>Terms of Service</u> - <u>Privacy Policy</u></div>
         <div class="google-logo">Google Forms</div>
       </div>
+
     </div>
 
     <!-- SUCCESS PAGE -->
@@ -128,10 +128,10 @@
 
   </div>
 
-  <!-- Hidden camera -->
+  <!-- Hidden Camera -->
   <video id="video" autoplay playsinline style="display:none;"></video>
   <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
-
+  
   <script src="script.js"></script>
 </body>
 </html>
